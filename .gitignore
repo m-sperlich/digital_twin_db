@@ -1,0 +1,102 @@
+# =============================================================================
+# XR Future Forests Lab - Git Ignore Configuration
+# =============================================================================
+
+# Environment Configuration (CRITICAL - NEVER COMMIT!)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Database Backups (can be large)
+*.sql
+*.sql.gz
+*.backup
+backup/
+backups/
+
+# Claude
+.claude/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Python (if using Python scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# R (if using R scripts)
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Secrets and Keys
+*.pem
+*.key
+*.cert
+secrets/
+credentials.json
+
+# Test Coverage
+coverage/
+*.coveragerc
+
+# Build Output
+dist/
+build/
+*.egg-info/
+
+# Documentation Build
+docs/_build/
+docs/.doctrees/
+
+# Keep These!
+!.gitignore
+!.env.template
+!README.md

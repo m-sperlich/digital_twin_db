@@ -1,0 +1,15 @@
+# Lightweight container for generating Supabase keys
+# No need to install Node.js on host machine!
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install only the required dependency
+RUN npm install -g jsonwebtoken
+
+# Copy the key generation script
+COPY utils/generate-keys.js .
+
+# Default command
+ENTRYPOINT ["node", "generate-keys.js"]
