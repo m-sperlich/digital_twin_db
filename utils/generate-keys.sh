@@ -24,8 +24,13 @@ fi
 # Get the root directory (parent of utils)
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Run the Node.js script in a Docker container
-docker run --rm -v "$ROOT_DIR:/app" -w /app node:18-alpine sh -c "
-    npm install -g jsonwebtoken > /dev/null 2>&1 &&
-    node utils/generate-keys.js $@
-"
+# Build the keygen image if it doesn't exist
+if ! docker images | grep -q "xr-forests-keygen"; then
+    echo "Building key generator image (one-time setup)..."
+    docker build -f "$ROOT_DIR/docker/Dockerfile.keygen" -t xr-forests-keygen "$ROOT_DIR"
+    echo ""
+fi
+
+# Run the key generator as non-root user to avoid permission issues
+# The Dockerfile uses UID 1000 which matches most Linux users
+docker run --rm -v "$ROOT_DIR:/app" xr-forests-keygen $@

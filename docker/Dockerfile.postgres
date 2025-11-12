@@ -1,0 +1,19 @@
+# Custom Supabase PostgreSQL with PostGIS Pre-enabled
+FROM supabase/postgres:15.1.0.147
+
+# Create the directory and file that bypasses pg_tle restrictions
+USER root
+RUN mkdir -p /etc/postgresql-custom/extension-custom-scripts/ && \
+    echo "-- Placeholder for PostGIS extension creation" > /etc/postgresql-custom/extension-custom-scripts/before-create.sql && \
+    chmod -R 755 /etc/postgresql-custom/extension-custom-scripts/
+
+# Create a script that will enable PostGIS after postgres starts
+RUN echo '#!/bin/bash' > /docker-entrypoint-initdb.d/00_enable_postgis.sh && \
+    echo 'set -e' >> /docker-entrypoint-initdb.d/00_enable_postgis.sh && \
+    echo 'psql -v ON_ERROR_STOP=0 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL' >> /docker-entrypoint-initdb.d/00_enable_postgis.sh && \
+    echo '    CREATE EXTENSION IF NOT EXISTS postgis;' >> /docker-entrypoint-initdb.d/00_enable_postgis.sh && \
+    echo '    CREATE EXTENSION IF NOT EXISTS postgis_topology;' >> /docker-entrypoint-initdb.d/00_enable_postgis.sh && \
+    echo 'EOSQL' >> /docker-entrypoint-initdb.d/00_enable_postgis.sh && \
+    chmod +x /docker-entrypoint-initdb.d/00_enable_postgis.sh
+
+USER postgres

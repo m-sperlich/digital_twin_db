@@ -39,7 +39,7 @@ services:
       KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
       KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
     volumes:
-      - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
+      - ../supabase/kong.yml:/var/lib/kong/kong.yml:ro
     networks:
       - xr_forests_network
     depends_on:
@@ -98,7 +98,7 @@ services:
       PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       PGRST_DB_SCHEMAS: shared,public,pointclouds,trees,sensor,environments
       PGRST_DB_SCHEMA: shared
-      PGRST_DB_EXTRA_SEARCH_PATH: public,pointclouds,trees,sensor,environments
+      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions,pointclouds,trees,sensor,environments
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: ${SUPABASE_JWT_SECRET}
       PGRST_DB_USE_LEGACY_GUCS: "false"
@@ -234,7 +234,7 @@ services:
       S3_REGION: ${S3_REGION:-us-east-1}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
     volumes:
-      - ./supabase/functions:/home/deno/functions:Z
+      - ../supabase/functions:/home/deno/functions:Z
     command:
       - start
       - --main-service
@@ -269,7 +269,7 @@ services:
       JWT_EXP: ${JWT_EXPIRY:-3600}
     volumes:
       - db_data:/var/lib/postgresql/data:Z
-      - ./supabase/migrations:/docker-entrypoint-initdb.d:Z
+      - ../supabase/migrations:/docker-entrypoint-initdb.d:Z
     networks:
       - xr_forests_network
     healthcheck:
@@ -287,7 +287,7 @@ services:
     container_name: xr_forests_vector
     restart: unless-stopped
     volumes:
-      - ./supabase/vector.yml:/etc/vector/vector.yml:ro
+      - ../supabase/vector.yml:/etc/vector/vector.yml:ro
     environment:
       LOGFLARE_API_KEY: ${LOGFLARE_API_KEY:-}
     command: ["--config", "/etc/vector/vector.yml"]

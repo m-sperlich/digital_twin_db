@@ -29,8 +29,34 @@ cd digital_twin_db
 # 2. Generate secure configuration (uses Docker, no Node.js needed!)
 ./utils/generate-keys.sh --write
 
-# 3. Start the database
-docker compose -f docker/docker-compose.yml up -d
+# 3. Start the Supabase stack
+docker compose --env-file .env -f docker/docker-compose.yml up -d
+
+# Wait ~30 seconds for all services to become healthy:
+docker ps --filter "name=xr_forests" --format "table {{.Names}}\t{{.Status}}"
+
+# 4. Enable PostGIS extension via Supabase Studio (REQUIRED)
+# PostGIS must be enabled manually through the Supabase Studio UI.
+#
+# Steps:
+#   a) Open Supabase Studio: http://localhost:54323
+#   b) Navigate to: Database → Extensions (in left sidebar)
+#   c) Search for "postgis" → toggle to enable
+#   d) In the prompt, select "Create a new schema" → name it "extensions"
+#   e) Also enable "postgis_topology" the same way
+#
+# Verify PostGIS is enabled:
+docker exec xr_forests_db psql -U postgres -d postgres -c "SELECT extensions.postgis_version();"
+
+# 5. Apply PostGIS-dependent migrations
+# After enabling PostGIS, apply the remaining schema migrations:
+for f in supabase/post-setup-migrations/*.sql; do
+  echo "Applying: $(basename $f)"
+  docker exec -i xr_forests_db psql -U postgres -d postgres < "$f"
+done
+
+# Verify migrations completed:
+docker exec xr_forests_db psql -U postgres -d postgres -c "\dt shared.*"
 ```
 
 **What does key generation do?**
@@ -54,7 +80,7 @@ Once running, access the database through:
 Check that all services are running:
 
 ```bash
-docker compose -f docker/docker-compose.yml ps
+docker compose --env-file .env -f docker/docker-compose.yml ps
 ```
 
 All services should show "Up" status. If any show "Exit" or "Restarting", see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
@@ -92,7 +118,9 @@ This is the **data tier** of a larger system:
 The database organizes forest research data into 5 specialized schemas:
 
 ### 1. **shared** - Reference Data
+
 Core reference tables used across all schemas:
+
 - **Species** - Tree species definitions (Beech, Oak, Spruce, etc.)
 - **Locations** - Forest plot coordinates and metadata
 - **SoilTypes** - Soil classification system
@@ -100,28 +128,37 @@ Core reference tables used across all schemas:
 - **Processes** - Audit trail for all database changes
 
 ### 2. **pointclouds** - LiDAR Data
+
 Point cloud scan management:
+
 - **PointClouds** - Scan metadata with S3 file paths
 - Supports multiple processing variants (raw, filtered, classified)
 - Tracks processing status and quality metrics
 
 ### 3. **trees** - Tree Measurements
+
 Individual tree data and simulations:
+
 - **Trees** - Tree measurements and attributes
 - **Stems** - Multi-stem support for complex trees
 - **TreeSimulations** - Growth model outputs and predictions
 
 ### 4. **sensor** - Environmental Monitoring
+
 IoT sensor data collection:
+
 - **Sensors** - Sensor installations and configurations
 - **SensorReadings** - Time-series environmental data
 
 ### 5. **environments** - Environmental Conditions
+
 Processed environmental data:
+
 - **EnvironmentalConditions** - Temperature, humidity, soil moisture
 - Derived from sensors, manual input, or model outputs
 
 All tables include:
+
 - **Variant tracking** - Version control for data iterations
 - **Audit logging** - Full change history with user attribution
 - **Row-Level Security** - Fine-grained access control
@@ -132,14 +169,16 @@ All tables include:
 
 ### Option 1: Visual Interface (Supabase Studio)
 
-Open http://localhost:54323 in your browser.
+Open <http://localhost:54323> in your browser.
 
 **Table Editor** - Browse and edit data:
+
 1. Select a schema in the left sidebar
 2. Click on a table to view its contents
 3. Add, edit, or delete rows directly
 
 **SQL Editor** - Run custom queries:
+
 ```sql
 -- Example: Get all beech trees
 SELECT t.*, s.speciesname
@@ -158,6 +197,7 @@ The database automatically provides REST endpoints for all tables.
 **API Key**: Find `SUPABASE_ANON_KEY` in your `.env` file
 
 **Example using curl**:
+
 ```bash
 # Get all species
 curl "http://localhost:54321/rest/v1/species?select=*" \
@@ -178,6 +218,7 @@ curl -X POST "http://localhost:54321/rest/v1/locations" \
 ```
 
 **Example using Python**:
+
 ```python
 from supabase import create_client
 
@@ -200,6 +241,7 @@ response = supabase.table('locations').insert({
 ```
 
 **Example using R**:
+
 ```r
 library(httr)
 
@@ -232,6 +274,7 @@ Password: (from POSTGRES_PASSWORD in .env)
 ```
 
 **Using psql**:
+
 ```bash
 # Connect
 docker exec -it xr_forests_db psql -U postgres
@@ -285,6 +328,7 @@ The XR Future Forests Lab creates comprehensive digital forest ecosystems for re
 - **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 
 ### Technical Documentation
+
 - **[System Architecture](docs/architecture/architecture.md)** - Three-tier system design
 - **[Database Design](docs/architecture/database.md)** - Schema specifications and ERD
 - **[API Architecture](docs/architecture/api.md)** - PostgREST endpoint reference
@@ -292,6 +336,7 @@ The XR Future Forests Lab creates comprehensive digital forest ecosystems for re
 - **[S3 Integration](docs/supabase/s3-integration.md)** - Point cloud storage configuration
 
 ### Reference Guides
+
 - **[Quick Reference](docs/QUICK_REFERENCE.md)** - Common commands and URLs
 - **[Tech Stack](docs/tech-stack.md)** - Technology overview
 - **[Verification Guide](docs/VERIFICATION_GUIDE.md)** - Testing procedures
@@ -304,34 +349,37 @@ The XR Future Forests Lab creates comprehensive digital forest ecosystems for re
 
 ```bash
 # Start all services
-docker compose -f docker/docker-compose.yml up -d
+docker compose --env-file .env -f docker/docker-compose.yml up -d
 
 # Stop all services
-docker compose -f docker/docker-compose.yml down
+docker compose --env-file .env -f docker/docker-compose.yml down
 
 # View status
-docker compose -f docker/docker-compose.yml ps
+docker compose --env-file .env -f docker/docker-compose.yml ps
 
 # View logs
-docker compose -f docker/docker-compose.yml logs -f
+docker compose --env-file .env -f docker/docker-compose.yml logs -f
 ```
 
 ### Working with Data
 
 **Add sample data**:
+
 - Use Supabase Studio UI for manual entry
 - Use REST API for programmatic insertion
 - Write SQL migrations in `supabase/migrations/`
 
 **Update database schema**:
+
 1. Create new migration file: `supabase/migrations/010_your_changes.sql`
 2. Write SQL DDL commands
-3. Restart database: `docker compose -f docker/docker-compose.yml restart db`
+3. Restart database: `docker compose --env-file .env -f docker/docker-compose.yml restart db`
 
 **Create Edge Functions**:
+
 1. Create directory: `supabase/functions/my-function/`
 2. Add `index.ts` with Deno code
-3. Restart functions: `docker compose -f docker/docker-compose.yml restart functions`
+3. Restart functions: `docker compose --env-file .env -f docker/docker-compose.yml restart functions`
 
 ### Testing APIs
 
@@ -354,11 +402,13 @@ Large LiDAR files (.las, .laz) can be stored in external S3 buckets rather than 
 **Note**: S3 storage is **optional**. The database works perfectly fine for tree measurements, sensor data, and locations without S3. Only configure S3 if you're working with point cloud files.
 
 **How it works** (when configured):
+
 1. Database stores S3 file paths: `s3://bucket-name/path/file.las`
 2. Edge Functions generate presigned URLs for secure access
 3. Clients download directly from S3
 
 **Benefits**:
+
 - Unlimited storage capacity
 - Cost-effective for large files
 - No database bloat
@@ -374,12 +424,14 @@ See [S3 Integration Guide](docs/supabase/s3-integration.md) for setup instructio
 This repository is designed for both local development and production deployment.
 
 ### Local Development
+
 - Use default configuration from `.env.template`
 - Run on `localhost` with Docker Compose
 - Simple passwords acceptable for local testing
-- Start with: `docker compose -f docker/docker-compose.yml up -d`
+- Start with: `docker compose --env-file .env -f docker/docker-compose.yml up -d`
 
 ### Production Server
+
 - Use strong cryptographic keys (generate with `openssl rand -base64 32`)
 - Configure domain names and SSL/TLS certificates
 - Set up S3 bucket with proper IAM permissions
@@ -395,6 +447,7 @@ This repository is designed for both local development and production deployment
 External repositories consume this database through the REST API:
 
 ### The Grove (Tree Asset Generation)
+
 ```javascript
 import { createClient } from '@supabase/supabase-js'
 
@@ -411,6 +464,7 @@ const { data } = await supabase
 ```
 
 ### Potree Docker (Point Cloud Processing)
+
 ```python
 import requests
 
@@ -475,6 +529,7 @@ requests.post(
 ## Requirements
 
 ### Local Development
+
 - **Docker Desktop** - v20.10+
 - **Docker Compose** - v2.0+
 - **Node.js** - v16+ (for key generation)
@@ -482,6 +537,7 @@ requests.post(
 - **20GB disk space**
 
 ### Production Deployment
+
 - **Linux Server** - Ubuntu 22.04 LTS recommended
 - **16GB+ RAM**
 - **100GB+ SSD storage**
@@ -493,6 +549,7 @@ requests.post(
 ## Support
 
 ### Documentation
+
 All documentation is in the `docs/` directory, organized by topic.
 
 ### Issues
@@ -502,12 +559,14 @@ All documentation is in the `docs/` directory, organized by topic.
 - Create new issue with detailed description
 
 ### External Resources
+
 - [Supabase Documentation](https://supabase.com/docs)
 - [PostgREST API Reference](https://postgrest.org/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [PostGIS Documentation](https://postgis.net/)
 
 ### Contact
+
 University of Freiburg, Department of Forest Sciences
 
 ---

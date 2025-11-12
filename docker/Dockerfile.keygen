@@ -3,13 +3,21 @@
 
 FROM node:18-alpine
 
+# Set working directory
+WORKDIR /keygen
+
+# Install jsonwebtoken in the container (not in mounted volume)
+RUN npm install jsonwebtoken
+
+# Use the existing 'node' user (UID 1000) to avoid permission issues
+# This matches the UID of most Linux users
+USER node
+
+# Set working directory for mounted volume
 WORKDIR /app
 
-# Install only the required dependency
-RUN npm install -g jsonwebtoken
+# Set NODE_PATH so node can find modules from /keygen
+ENV NODE_PATH=/keygen/node_modules
 
-# Copy the key generation script
-COPY utils/generate-keys.js .
-
-# Default command
-ENTRYPOINT ["node", "generate-keys.js"]
+# Default command runs the script from mounted volume
+ENTRYPOINT ["node", "utils/generate-keys.js"]
