@@ -1,95 +1,127 @@
-# Documentation Index
+# Digital Twin Database Documentation
 
-This folder contains technical documentation for the XR Future Forests Lab database system.
+This folder contains all documentation for the XR Future Forests Lab digital twin database system.
 
----
+## 📚 Documentation Index
 
-## Getting Started
+### Getting Started
 
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
-- **[SUPABASE_INTRO.md](SUPABASE_INTRO.md)** - Introduction to Supabase (what it is, how it works)
-- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick reference for daily use
+- **[supabase-introduction.md](supabase-introduction.md)** - Start here! Explains what Supabase is and how the system works
+- **[deployment-guide.md](deployment-guide.md)** - Complete setup instructions for local development and production deployment
 
----
+### Database Documentation
 
-## Architecture and Design
+- **[database-schema.md](database-schema.md)** - Detailed database design documentation with schema organization and relationships
+- **[database-erd.dbml](database-erd.dbml)** - Entity Relationship Diagram in DBML format (view at [dbdiagram.io](https://dbdiagram.io/))
+- **[database-diagram.drawio](database-diagram.drawio)** - Editable database diagram (open with [draw.io](https://app.diagrams.net/))
 
-- **[architecture/architecture.md](architecture/architecture.md)** - System architecture overview
-- **[architecture/database.md](architecture/database.md)** - Database schema design and ERD
-- **[architecture/api.md](architecture/api.md)** - REST API endpoints and usage
-- **[architecture/services.md](architecture/services.md)** - Service descriptions and ports
-- **[architecture/data-contracts.md](architecture/data-contracts.md)** - Data contracts between services
+### Reference Guides
 
----
+- **[api-quick-reference.md](api-quick-reference.md)** - Quick reference for API endpoints, database credentials, and common operations
+- **[troubleshooting.md](troubleshooting.md)** - Common problems and solutions for local development and deployment
 
-## Deployment and Operations
+## 🚀 Quick Links
 
-- **[supabase/setup-guide.md](supabase/setup-guide.md)** - Production deployment guide
-- **[tech-stack.md](tech-stack.md)** - Technology stack overview
+### For First-Time Users
 
----
-
-## Reference
-
-- **[reference/sources.md](reference/sources.md)** - Technical references and related tools
-
----
-
-## Documentation Organization
-
-### For New Team Members
-Start with:
-1. [../README.md](../README.md) - Project overview and setup instructions
-2. [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Common commands
+1. Read [supabase-introduction.md](supabase-introduction.md) to understand the system
+2. Follow [deployment-guide.md](deployment-guide.md) to set up your local environment
+3. Use [api-quick-reference.md](api-quick-reference.md) for day-to-day operations
 
 ### For Developers
-Explore:
-- [architecture/database.md](architecture/database.md) - Database schema
-- [architecture/api.md](architecture/api.md) - API endpoints
-- [tech-stack.md](tech-stack.md) - Technologies used
 
-### For Production Deployment
-See:
-- [supabase/setup-guide.md](supabase/setup-guide.md) - Server setup
-- [architecture/services.md](architecture/services.md) - Service configuration
+1. Review [database-schema.md](database-schema.md) to understand data structures
+2. View [database-erd.dbml](database-erd.dbml) for visual schema reference
+3. Check [troubleshooting.md](troubleshooting.md) when issues arise
+
+### For Database Designers
+
+1. Open [database-diagram.drawio](database-diagram.drawio) in draw.io for editing
+2. Export schema changes to [database-erd.dbml](database-erd.dbml)
+3. Update [database-schema.md](database-schema.md) with documentation
+
+## 📖 Document Descriptions
+
+### supabase-introduction.md
+
+**Purpose:** Beginner-friendly introduction to Supabase and the database system  
+**Audience:** New users, researchers, students  
+**Content:** Core concepts, components, examples, and practical operations
+
+### deployment-guide.md
+
+**Purpose:** Complete deployment and configuration instructions  
+**Audience:** System administrators, DevOps engineers  
+**Content:** Prerequisites, local setup, production deployment, environment configuration, migrations, and maintenance
+
+### database-schema.md
+
+**Purpose:** Technical database design documentation  
+**Audience:** Database designers, backend developers  
+**Content:** Schema organization, table relationships, design principles, field-level specifications
+
+### database-erd.dbml
+
+**Purpose:** Machine-readable entity relationship diagram  
+**Audience:** Developers, database tools  
+**Content:** Complete schema definition in DBML format (can be imported into dbdiagram.io, DBeaver, etc.)
+
+### database-diagram.drawio
+
+**Purpose:** Editable visual database diagram  
+**Audience:** Database designers, documentation maintainers  
+**Content:** Graphical schema representation (editable in draw.io)
+
+### api-quick-reference.md
+
+**Purpose:** Quick lookup for common tasks and configurations  
+**Audience:** All users  
+**Content:** Access URLs, API keys, credentials, code examples, Docker commands
+
+### troubleshooting.md
+
+**Purpose:** Problem-solving guide for common issues  
+**Audience:** All users  
+**Content:** Step-by-step solutions for Docker, database, API, and networking problems
+
+## 🔧 Maintenance
+
+### Updating Documentation
+
+When making changes to the database:
+
+1. Update SQL migrations in `../docker/volumes/db/init/`
+2. Update [database-schema.md](database-schema.md) with new tables/columns
+3. Update [database-erd.dbml](database-erd.dbml) with schema changes
+4. Update [database-diagram.drawio](database-diagram.drawio) if major structural changes
+5. Add any new troubleshooting tips to [troubleshooting.md](troubleshooting.md)
+
+### Documentation Standards
+
+- **File naming:** Use lowercase with hyphens (kebab-case): `my-document.md`
+- **Headings:** Use sentence case: "Getting started" not "Getting Started"
+- **Code blocks:** Always specify language for syntax highlighting
+- **Links:** Use relative links within docs folder
+- **Examples:** Include working examples with actual values (sanitized credentials)
+
+## 🤝 Contributing
+
+When adding new documentation:
+
+1. Use descriptive filenames that indicate content
+2. Add entry to this README in appropriate section
+3. Cross-reference related documents
+4. Include practical examples
+5. Test all commands and code samples
+
+## 📞 Support
+
+For questions or issues:
+
+- Check [troubleshooting.md](troubleshooting.md) first
+- Review [Supabase documentation](https://supabase.com/docs)
+- Contact: University of Freiburg, Department of Forest Sciences
 
 ---
 
-## File Structure
-
-```
-docs/
-├── README.md                    # This file
-├── QUICK_REFERENCE.md           # Quick reference guide
-├── tech-stack.md                # Technology overview
-│
-├── architecture/                # System architecture
-│   ├── architecture.md          # Overall system design
-│   ├── database.md              # Database schema
-│   ├── api.md                   # API documentation
-│   ├── services.md              # Service descriptions
-│   ├── data-contracts.md        # Inter-service contracts
-│   └── xr_forests_complete_erd.dbml  # ERD diagram
-│
-├── supabase/                    # Deployment guides
-│   └── setup-guide.md           # Production deployment
-│
-└── reference/                   # External references
-    └── sources.md               # Technical resources
-```
-
----
-
-## Contributing to Documentation
-
-When adding or updating documentation:
-
-1. **Keep it concise** - Focus on what people need to know
-2. **Use examples** - Include code snippets and commands
-3. **Update the index** - Add new files to this README
-4. **Test instructions** - Verify commands actually work
-5. **Remove outdated content** - Keep docs current
-
----
-
-**Last Updated**: November 2024
+Last updated: November 2025

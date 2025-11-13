@@ -1,71 +1,46 @@
-# Digital Twin Database - XR Future Forests Lab
+# Digital Forest Twin Database
 
-> **Supabase-powered data tier for forest research and XR visualization**
-> University of Freiburg, Department of Forest Sciences
-> Target: August 15, 2025
+> **Supabase-powered database for research connected to digital forest twins**
 
-This repository provides the database infrastructure for creating digital twins of forests through immersive XR technologies. It uses Supabase to deliver a complete PostgreSQL-based data platform with auto-generated REST APIs, real-time subscriptions, and integrated authentication.
+This repository provides the database infrastructure for creating digital twins of forests. It uses Supabase to deliver a complete PostgreSQL-based data platform with auto-generated REST APIs, real-time subscriptions, and integrated authentication.
 
 ---
 
 ## Quick Start
 
-### Prerequisites
-
-- **Git** - To clone this repository
-- **Docker Desktop** - v20.10+ ([Download](https://www.docker.com/products/docker-desktop/))
-- **8GB RAM** minimum (16GB recommended)
-- **20GB free disk space**
-
 ### Installation
 
-Get the database running locally in 3 steps:
+Get the database running locally in 2 steps:
 
 ```bash
 # 1. Clone the repository
 git clone <repository-url>
 cd digital_twin_db
 
-# 2. Generate secure configuration (uses Docker, no Node.js needed!)
-./utils/generate-keys.sh --write
+# 2. Start the Supabase stack (official Docker setup with pre-configured .env)
+cd docker
+docker compose up -d
 
-# 3. Start the Supabase stack
-docker compose --env-file .env -f docker/docker-compose.yml up -d
-
-# Wait ~30 seconds for all services to become healthy:
-docker ps --filter "name=xr_forests" --format "table {{.Names}}\t{{.Status}}"
-
-# 4. Enable PostGIS extension via Supabase Studio (REQUIRED)
-# PostGIS must be enabled manually through the Supabase Studio UI.
-#
-# Steps:
-#   a) Open Supabase Studio: http://localhost:54323
-#   b) Navigate to: Database → Extensions (in left sidebar)
-#   c) Search for "postgis" → toggle to enable
-#   d) In the prompt, select "Create a new schema" → name it "extensions"
-#   e) Also enable "postgis_topology" the same way
-#
-# Verify PostGIS is enabled:
-docker exec xr_forests_db psql -U postgres -d postgres -c "SELECT extensions.postgis_version();"
-
-# 5. Apply PostGIS-dependent migrations
-# After enabling PostGIS, apply the remaining schema migrations:
-for f in supabase/post-setup-migrations/*.sql; do
-  echo "Applying: $(basename $f)"
-  docker exec -i xr_forests_db psql -U postgres -d postgres < "$f"
-done
-
-# Verify migrations completed:
-docker exec xr_forests_db psql -U postgres -d postgres -c "\dt shared.*"
+# Wait ~30 seconds for all services to become healthy
+docker compose ps
 ```
 
-**What does key generation do?**
+All 13 services should show as "healthy". The database is automatically initialized with:
 
-- Creates a `.env` file with all necessary configuration
-- Generates secure random passwords and API keys
-- Uses cryptography to create authentication tokens
+- PostGIS extension enabled
+- 5 custom forest schemas (shared, pointclouds, trees, sensor, environments)
+- Sample data (5 European tree species)
+- Row-level security policies
 
-**Important**: Never commit the `.env` file to git! It contains secrets and is already in `.gitignore`.
+**About the .env file:**
+
+The `.env` file is already set up with secure credentials. It contains:
+
+- Database passwords and JWT secrets
+- API keys for authentication
+- Service configuration
+
+**Important**: The `.env` file contains secrets and should never be committed to git. Before deploying to production, regenerate all passwords and tokens.
 
 ### Access Points
 
@@ -80,12 +55,19 @@ Once running, access the database through:
 Check that all services are running:
 
 ```bash
-docker compose --env-file .env -f docker/docker-compose.yml ps
+cd docker
+docker compose ps
 ```
 
-All services should show "Up" status. If any show "Exit" or "Restarting", see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+All services should show "healthy" status. If any show "Exit" or "Restarting", check the logs:
 
-**New to Supabase?** See [docs/SUPABASE_INTRO.md](docs/SUPABASE_INTRO.md) to learn what Supabase is and how it works.
+```bash
+docker compose logs [service-name]
+```
+
+For more troubleshooting, see [docker/README.md](docker/README.md).
+
+**New to Supabase?** See [docs/supabase-introduction.md](docs/supabase-introduction.md) to learn what Supabase is and how it works.
 
 ---
 
@@ -93,7 +75,7 @@ All services should show "Up" status. If any show "Exit" or "Restarting", see [d
 
 ### Database Infrastructure
 
-This repository implements the data tier of the XR Future Forests Lab using **Supabase**, providing:
+This repository implements the data tier for digital forest twin projects using **Supabase**, providing:
 
 - **PostgreSQL + PostGIS** - Spatial database with forest-specific schemas
 - **PostgREST** - Automatically generated REST APIs from database structure
@@ -102,14 +84,6 @@ This repository implements the data tier of the XR Future Forests Lab using **Su
 - **Storage API** - S3-compatible storage for point cloud files
 - **Edge Functions** - Serverless business logic (Deno/TypeScript)
 - **Supabase Studio** - Visual database management interface
-
-### Multi-Repository Architecture
-
-This is the **data tier** of a larger system:
-
-- **📋 Planning Hub** - Central coordination and architecture documentation
-- **🌲 The Grove** - Tree asset generation service (consumes Tree API)
-- **☁️ Potree Docker** - Point cloud processing service (uses Point Cloud API)
 
 ---
 
@@ -277,7 +251,7 @@ Password: (from POSTGRES_PASSWORD in .env)
 
 ```bash
 # Connect
-docker exec -it xr_forests_db psql -U postgres
+docker exec -it dftdb-db psql -U postgres
 
 # List schemas
 \dn
@@ -294,52 +268,24 @@ SELECT * FROM shared.species;
 
 ---
 
-## Project Vision
-
-The XR Future Forests Lab creates comprehensive digital forest ecosystems for research, education, and stakeholder engagement.
-
-### Research Applications
-
-- **Digital Forest Twins** - Complete digital replicas with real-time data integration
-- **Process Visualization** - Make invisible processes (sap flow, root competition) visible
-- **Growth Modeling** - Integration with SILVA and other simulation models
-- **Multi-scale Analysis** - From individual trees to landscape dynamics
-
-### Training and Simulation
-
-- **Immersive Visualization** - Experience forests in ways impossible in field studies
-- **Decision Support** - Practice management scenarios without real-world consequences
-- **Temporal Dynamics** - Visualize decades of change in accelerated time
-- **Interactive Analysis** - Transform complex data into intuitive experiences
-
-### Stakeholder Engagement
-
-- **Policy Communication** - Accessible visualizations for decision-makers
-- **Public Outreach** - Make forest science engaging for broader audiences
-- **Interdisciplinary Collaboration** - Bridge forestry, technology, and policy
-- **Industry Partnerships** - Practical tools for modern forest management
-
----
-
 ## Documentation
 
 ### Getting Started
 
-- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[docs/README.md](docs/README.md)** - Complete documentation index
+- **[docs/supabase-introduction.md](docs/supabase-introduction.md)** - Learn what Supabase is and how it works
+- **[docs/troubleshooting.md](docs/troubleshooting.md)** - Common issues and solutions
 
 ### Technical Documentation
 
-- **[System Architecture](docs/architecture/architecture.md)** - Three-tier system design
-- **[Database Design](docs/architecture/database.md)** - Schema specifications and ERD
-- **[API Architecture](docs/architecture/api.md)** - PostgREST endpoint reference
-- **[Supabase Setup](docs/supabase/setup-guide.md)** - Production deployment guide
-- **[S3 Integration](docs/supabase/s3-integration.md)** - Point cloud storage configuration
+- **[Database Schema](docs/database-schema.md)** - Schema specifications and design
+- **[Database ERD](docs/database-erd.dbml)** - Entity relationship diagram (DBML format)
+- **[Database Diagram](docs/database-diagram.drawio)** - Visual schema diagram (editable)
+- **[Deployment Guide](docs/deployment-guide.md)** - Production deployment instructions
 
 ### Reference Guides
 
-- **[Quick Reference](docs/QUICK_REFERENCE.md)** - Common commands and URLs
-- **[Tech Stack](docs/tech-stack.md)** - Technology overview
-- **[Verification Guide](docs/VERIFICATION_GUIDE.md)** - Testing procedures
+- **[API Quick Reference](docs/api-quick-reference.md)** - Common commands, URLs, and examples
 
 ---
 
@@ -348,17 +294,20 @@ The XR Future Forests Lab creates comprehensive digital forest ecosystems for re
 ### Starting and Stopping
 
 ```bash
+# Navigate to docker directory
+cd docker
+
 # Start all services
-docker compose --env-file .env -f docker/docker-compose.yml up -d
+docker compose up -d
 
 # Stop all services
-docker compose --env-file .env -f docker/docker-compose.yml down
+docker compose down
 
 # View status
-docker compose --env-file .env -f docker/docker-compose.yml ps
+docker compose ps
 
 # View logs
-docker compose --env-file .env -f docker/docker-compose.yml logs -f
+docker compose logs -f
 ```
 
 ### Working with Data
@@ -367,19 +316,19 @@ docker compose --env-file .env -f docker/docker-compose.yml logs -f
 
 - Use Supabase Studio UI for manual entry
 - Use REST API for programmatic insertion
-- Write SQL migrations in `supabase/migrations/`
+- Write SQL migrations in `docker/volumes/db/init/`
 
 **Update database schema**:
 
-1. Create new migration file: `supabase/migrations/010_your_changes.sql`
+1. Create new migration file: `docker/volumes/db/init/19-your-changes.sql`
 2. Write SQL DDL commands
-3. Restart database: `docker compose --env-file .env -f docker/docker-compose.yml restart db`
+3. Apply manually: `docker exec -i dftdb-db psql -U postgres < docker/volumes/db/init/19-your-changes.sql`
 
 **Create Edge Functions**:
 
-1. Create directory: `supabase/functions/my-function/`
+1. Create directory: `docker/volumes/functions/my-function/`
 2. Add `index.ts` with Deno code
-3. Restart functions: `docker compose --env-file .env -f docker/docker-compose.yml restart functions`
+3. Restart functions: `docker compose restart functions`
 
 ### Testing APIs
 
@@ -415,7 +364,7 @@ Large LiDAR files (.las, .laz) can be stored in external S3 buckets rather than 
 - Direct downloads with temporary URLs
 
 **Configuration**:
-See [S3 Integration Guide](docs/supabase/s3-integration.md) for setup instructions (only needed if using point clouds).
+See the Edge Functions in `docker/volumes/functions/` and [Deployment Guide](docs/deployment-guide.md) for S3 setup instructions (only needed if using point clouds).
 
 ---
 
@@ -425,10 +374,10 @@ This repository is designed for both local development and production deployment
 
 ### Local Development
 
-- Use default configuration from `.env.template`
+- Use default configuration from `.env` in docker directory
 - Run on `localhost` with Docker Compose
-- Simple passwords acceptable for local testing
-- Start with: `docker compose --env-file .env -f docker/docker-compose.yml up -d`
+- Pre-configured credentials suitable for local testing
+- Start with: `cd docker && docker compose up -d`
 
 ### Production Server
 
@@ -438,123 +387,19 @@ This repository is designed for both local development and production deployment
 - Configure backups and monitoring
 - Disable public signup (`DISABLE_SIGNUP=true`)
 
-**See [Supabase Setup Guide](docs/supabase/setup-guide.md) for detailed production deployment instructions.**
-
----
-
-## Integration with Other Services
-
-External repositories consume this database through the REST API:
-
-### The Grove (Tree Asset Generation)
-
-```javascript
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  'http://your-server.com:54321',
-  'your_anon_key'
-)
-
-// Fetch tree data for 3D model generation
-const { data } = await supabase
-  .from('trees')
-  .select('*, species(*), stems(*)')
-  .eq('locationid', 15)
-```
-
-### Potree Docker (Point Cloud Processing)
-
-```python
-import requests
-
-# Store processing results
-requests.post(
-    'http://your-server.com:54321/rest/v1/pointclouds',
-    headers={'apikey': 'your_anon_key'},
-    json={
-        'parentvariantid': 123,
-        'varianttypeid': 2,
-        'processingstatus': 'completed',
-        'filepath': 's3://bucket/processed.las'
-    }
-)
-```
-
----
-
-## Technology Stack
-
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Database** | PostgreSQL 15 + PostGIS | Spatial data storage |
-| **API Layer** | PostgREST | Auto-generated REST endpoints |
-| **Gateway** | Kong | API routing and rate limiting |
-| **Authentication** | GoTrue | User management and JWT |
-| **Real-time** | Supabase Realtime | WebSocket subscriptions |
-| **Storage** | Supabase Storage + S3 | File storage and management |
-| **Functions** | Deno Edge Runtime | Serverless business logic |
-| **UI** | Supabase Studio | Database management |
-| **Deployment** | Docker Compose | Container orchestration |
-
----
-
-## Current Status
-
-### ✅ Completed (Milestone 2)
-
-- Complete Supabase Docker Compose stack
-- PostgreSQL + PostGIS with 5 specialized schemas
-- 10 SQL migrations with sample data
-- Row-level security policies
-- PostgREST auto-generated APIs
-- Real-time subscription support
-- Edge Functions framework
-- S3 integration for point clouds
-- Comprehensive documentation
-
-### 🔄 In Progress (Milestone 3)
-
-- Production server deployment
-- Production environment configuration
-- SSL/TLS certificate setup
-- External service integration
-- Backup and monitoring systems
-- Performance optimization
-
-**Target: August 15, 2025** - Core database operational for VR integration
-
----
-
-## Requirements
-
-### Local Development
-
-- **Docker Desktop** - v20.10+
-- **Docker Compose** - v2.0+
-- **Node.js** - v16+ (for key generation)
-- **8GB RAM** minimum (16GB recommended)
-- **20GB disk space**
-
-### Production Deployment
-
-- **Linux Server** - Ubuntu 22.04 LTS recommended
-- **16GB+ RAM**
-- **100GB+ SSD storage**
-- **Domain name** with DNS
-- **S3 bucket** - AWS S3, MinIO, or compatible
+**See [docs/deployment-guide.md](docs/deployment-guide.md) and the official [Supabase Self-Hosting Guide](https://supabase.com/docs/guides/hosting/docker) for detailed production deployment instructions.**
 
 ---
 
 ## Support
 
-### Documentation
+### Finding Help
 
-All documentation is in the `docs/` directory, organized by topic.
+All documentation is in the `docs/` directory, organized by topic. Start with [docs/README.md](docs/README.md) for a complete guide.
 
 ### Issues
 
-- Check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common problems
+- Check [docs/troubleshooting.md](docs/troubleshooting.md) for common problems
 - Review existing GitHub issues
 - Create new issue with detailed description
 
@@ -564,17 +409,3 @@ All documentation is in the `docs/` directory, organized by topic.
 - [PostgREST API Reference](https://postgrest.org/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [PostGIS Documentation](https://postgis.net/)
-
-### Contact
-
-University of Freiburg, Department of Forest Sciences
-
----
-
-## License
-
-[Specify your license here]
-
----
-
-**Built with Supabase | PostgreSQL | PostGIS | Docker | Deno | Kong**
