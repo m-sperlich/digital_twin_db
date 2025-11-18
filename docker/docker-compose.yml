@@ -428,6 +428,16 @@ services:
       - ./volumes/db/init/16-rls-policies.sql:/docker-entrypoint-initdb.d/migrations/16-rls-policies.sql:Z
       - ./volumes/db/init/17-audit-functions.sql:/docker-entrypoint-initdb.d/migrations/17-audit-functions.sql:Z
       - ./volumes/db/init/18-seed-data.sql:/docker-entrypoint-initdb.d/migrations/18-seed-data.sql:Z
+      - ./volumes/db/init/19-load-csv-data.sql:/docker-entrypoint-initdb.d/migrations/19-load-csv-data.sql:Z
+      - ./volumes/db/init/20-load-sensor-data.sql:/docker-entrypoint-initdb.d/migrations/20-load-sensor-data.sql:Z
+      # CSV data files for tree inventory
+      - ./volumes/db/init/ecosense_250908.csv:/docker-entrypoint-initdb.d/ecosense_250908.csv:Z
+      - ./volumes/db/init/mathisle_250904.csv:/docker-entrypoint-initdb.d/mathisle_250904.csv:Z
+      # CSV data files for sensor time-series
+      - ./volumes/db/init/Sapflow.DouglasFir_Mixed_5_Total_SapFlow@Ecosense_MixedPlot.csv:/docker-entrypoint-initdb.d/Sapflow.DouglasFir_Mixed_5_Total_SapFlow@Ecosense_MixedPlot.csv:Z
+      - ./volumes/db/init/SoilMoisture.DouglasFir_Mixed_5_edge_E@Ecosense_MixedPlot.csv:/docker-entrypoint-initdb.d/SoilMoisture.DouglasFir_Mixed_5_edge_E@Ecosense_MixedPlot.csv:Z
+      - ./volumes/db/init/SoilTemp.DouglasFir_Mixed_5_edge_E@Ecosense_MixedPlot.csv:/docker-entrypoint-initdb.d/SoilTemp.DouglasFir_Mixed_5_edge_E@Ecosense_MixedPlot.csv:Z
+      - ./volumes/db/init/StemRadialVar.DouglasFir_Mixed_5_Dendrometer@Ecosense_MixedPlot.csv:/docker-entrypoint-initdb.d/StemRadialVar.DouglasFir_Mixed_5_Dendrometer@Ecosense_MixedPlot.csv:Z
       # Use named volume to persist pgsodium decryption key between restarts
       - db-config:/etc/postgresql-custom
     healthcheck:

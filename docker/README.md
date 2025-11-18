@@ -23,6 +23,7 @@ This setup provides a complete, self-hosted Supabase stack with:
 The `.env` file contains all configuration. It's already set up with secure credentials.
 
 **Key settings for this project:**
+
 ```bash
 # Custom schemas exposed through REST API
 PGRST_DB_SCHEMAS=public,storage,graphql_public,shared,pointclouds,trees,sensor,environments
@@ -54,8 +55,8 @@ All 13 services should show as "healthy" after about 30 seconds.
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
-| **Studio UI** | http://localhost:54323 | Username: `supabase`<br>Password: (from `.env`) |
-| **REST API** | http://localhost:54321/rest/v1 | API Key: (from `.env` ANON_KEY) |
+| **Studio UI** | <http://localhost:54323> | Username: `supabase`<br>Password: (from `.env`) |
+| **REST API** | <http://localhost:54321/rest/v1> | API Key: (from `.env` ANON_KEY) |
 | **PostgreSQL** | localhost:54322 | User: `postgres`<br>Password: (from `.env`) |
 
 ### 4. Custom Database Initialization
@@ -73,8 +74,17 @@ The forest database schemas are automatically initialized via SQL files in `volu
 | `16-rls-policies.sql` | Row-level security |
 | `17-audit-functions.sql` | Change tracking |
 | `18-seed-data.sql` | Sample species data |
+| `19-load-csv-data.sql` | **Import real tree inventory data** (2,325 trees) |
 
 These run automatically when the database is first initialized.
+
+**Tree Inventory Data**: The setup automatically imports real forest plot data from:
+
+- **EcoSense Plot 16**: 1,533 beech trees with TLS heights
+- **EcoSense Plot 8**: 49 mixed species trees  
+- **Mathisleweiher**: 743 beech trees with GPS coordinates
+
+See [`data/README.md`](../data/README.md) for dataset details.
 
 ## Common Operations
 
