@@ -229,13 +229,13 @@ BEGIN
     -- Determine table and record ID
     table_name := TG_TABLE_NAME;
     CASE TG_TABLE_NAME
-        WHEN 'PointClouds' THEN
+        WHEN 'pointclouds' THEN
             record_id := NEW.VariantID;
-        WHEN 'Trees' THEN
+        WHEN 'trees' THEN
             record_id := NEW.VariantID;
-        WHEN 'Environments' THEN
+        WHEN 'environments' THEN
             record_id := NEW.VariantID;
-        WHEN 'Stems' THEN
+        WHEN 'stems' THEN
             record_id := NEW.StemID;
         ELSE
             record_id := NULL;
@@ -248,7 +248,7 @@ BEGIN
 
     -- Audit specific critical fields (add more as needed)
     CASE TG_TABLE_NAME
-        WHEN 'Trees' THEN
+        WHEN 'trees' THEN
             -- Audit tree measurements
             IF OLD.Height_m IS DISTINCT FROM NEW.Height_m THEN
                 PERFORM shared.create_audit_log(
@@ -279,7 +279,7 @@ BEGIN
                 );
             END IF;
 
-        WHEN 'Stems' THEN
+        WHEN 'stems' THEN
             -- Audit stem measurements
             IF OLD.DBH_cm IS DISTINCT FROM NEW.DBH_cm THEN
                 PERFORM shared.create_audit_log(
@@ -296,7 +296,7 @@ BEGIN
                 );
             END IF;
 
-        WHEN 'Environments' THEN
+        WHEN 'environments' THEN
             -- Audit environmental parameters
             IF OLD.AvgTemperature_C IS DISTINCT FROM NEW.AvgTemperature_C THEN
                 PERFORM shared.create_audit_log(
@@ -313,7 +313,7 @@ BEGIN
                 );
             END IF;
 
-        WHEN 'PointClouds' THEN
+        WHEN 'pointclouds' THEN
             -- Audit processing status changes
             IF OLD.ProcessingStatus IS DISTINCT FROM NEW.ProcessingStatus THEN
                 PERFORM shared.create_audit_log(

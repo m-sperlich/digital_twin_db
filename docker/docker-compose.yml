@@ -559,5 +559,27 @@ services:
         "/app/bin/migrate && /app/bin/supavisor eval \"$$(cat /etc/pooler/pooler.exs)\" && /app/bin/server"
       ]
 
+  ecosense-sync:
+    container_name: dftdb-ecosense-sync
+    build:
+      context: ../services/ecosense-sync
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - AQUARIUS_HOSTNAME=${AQUARIUS_HOSTNAME}
+      - AQUARIUS_USERNAME=${AQUARIUS_USERNAME}
+      - AQUARIUS_PASSWORD=${AQUARIUS_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=${POSTGRES_PORT}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=postgres
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - SYNC_INTERVAL_MINUTES=60
+
 volumes:
   db-config:

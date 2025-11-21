@@ -1,0 +1,13 @@
+name: ecosense-data-sync
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - requests>=2.31.0
+  - psycopg2>=2.9.7
+  - python-dotenv>=1.0.0
+  - schedule>=1.2.0
+  - pip
+  - pip:
+    # Add any pip-only packages here if needed
