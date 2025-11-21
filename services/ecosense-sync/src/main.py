@@ -41,6 +41,10 @@ async def lifespan(app: FastAPI):
         f"Scheduler started with interval {settings.SYNC_INTERVAL_MINUTES} minutes"
     )
 
+    # Run initial sync on startup
+    logger.info("Triggering initial sync on startup...")
+    scheduler.add_job(scheduled_sync, "date")
+
     yield
 
     # Shutdown

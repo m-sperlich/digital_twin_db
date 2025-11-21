@@ -90,6 +90,15 @@ services:
     # https://unix.stackexchange.com/a/294837
     entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
 
+  mail:
+    container_name: dftdb-mail
+    image: inbucket/inbucket:3.0.3
+    restart: unless-stopped
+    ports:
+      - 2500:2500 # SMTP
+      - 9000:9000 # web interface
+      - 1100:1100 # POP3
+
   auth:
     container_name: dftdb-auth
     image: supabase/gotrue:v2.182.1

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # Sync Settings
     SYNC_INTERVAL_MINUTES: int = 60
-    DEFAULT_DAYS_BACK: int = 7
+    DEFAULT_DAYS_BACK: int = 30
 
     class Config:
         env_file = ".env"
